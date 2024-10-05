@@ -1,3 +1,4 @@
+
 .field {
     width: 100vw;
     height: 100vh;
@@ -57,6 +58,12 @@
     position: absolute;
     right: 0;
     z-index: 1;
+
+    @media (max-width: 768px) {
+        .hide-mobile {
+            display: none !important;
+        }
+    }
 }
 
 .btn-add {
@@ -72,4 +79,46 @@
     left: 100px;
     right: 100px;
     z-index: 1;
+
+    @media (max-width: 768px) {
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
 }
+
+.scroll-container { 
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    app-player-mobile {
+        margin-left: 10px;
+    }
+}
+
+app-player, app-player-mobile  {
+    cursor: pointer;
+
+    &:hover {
+        filter: brightness(1.25);
+    }
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .hide-desktop {
+        display: none;
+    }
+}
+ 

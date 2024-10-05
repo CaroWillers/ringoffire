@@ -1,4 +1,4 @@
 <div class="player" [class.player-active]="playerActive">
-    <img src="/assets/img/avatar.webp">
-    <span>{{ name }}</span>
+  <span>{{ name }}</span>
+  <img [src]="image || '/assets/img/profile/user.png'" alt="{{ name }}'s profile picture" class="player-image" />
 </div>

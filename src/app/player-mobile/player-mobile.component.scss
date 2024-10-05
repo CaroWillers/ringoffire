@@ -1,0 +1,37 @@
+.player {
+    width: 100px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    text-align: center;
+    padding: 8px;
+    background-color: rgb(179, 196, 179);
+    transition: all 0.3s ease; 
+    span {
+        font-size: 16px;
+        margin-left: 0;
+    }
+    img {
+        width: 35px;
+        height: 35px;
+        object-fit: cover;
+        border-radius: 100%;
+        margin-top: 16px;
+    }
+}
+
+.player-active {
+    background-color: red !important;    
+    transform: scale(1.1);   
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);   
+    transition: all 0.3s ease;   
+}
+
+.player-active img {
+    border: 3px solid white;   
+}
+ 
+ 

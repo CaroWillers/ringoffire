@@ -1,0 +1,10 @@
+<h2 class="align-self: center" mat-dialog-title>Edit Player</h2>
+<div *ngFor="let picture of allProfilePictures">
+    <img 
+      class="profile-picture" 
+      src="./assets/img/profile/{{ picture }}" 
+      alt="Profile picture"
+      (click)="closeDialog(picture)"  
+    >
+  </div>
+  

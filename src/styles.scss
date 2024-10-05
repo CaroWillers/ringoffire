@@ -3,3 +3,24 @@ body {
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+@media (max-width: 768) {
+    .hide-mobile {
+        display: none !important;
+    }
+    .hide-desktop {
+        display: block;
+    } 
+}
+
+@media (min-width: 768) {
+    .hide-desktop {
+        display: none;
+    }
+    .hide-mobile {
+        display: block;
+    } 
+}
+
+ 
