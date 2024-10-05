@@ -1,0 +1,74 @@
+.start-screen {
+    background-color: #404040;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+svg {
+    position: absolute;
+    top: 220px;
+    width: 80%;
+    height: auto;
+}
+
+text {
+    font-size: 64px;
+    fill: red;
+}
+
+path {
+    fill: transparent;
+}
+
+img {
+    width: 80%;
+    height: 100vh;
+  
+  
+}
+
+.button {
+    position: absolute;
+    width: 350px; 
+    cursor: pointer;
+    padding: 20px 40px;
+    background-color: red;
+    color: black;
+    text-align: center;
+    font-size: 28px;
+    border: dotted 4px black;
+    border-radius: 8px; 
+    font-weight: bold; 
+    transition: all 0.5s;
+}
+
+.button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}  
+
+.button span:after {
+    content: '\00bb'; 
+    font-size: 32x;
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;     
+    transition: 0.5s;
+} 
+
+.button:hover span {
+    padding-right: 25px;  
+} 
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
