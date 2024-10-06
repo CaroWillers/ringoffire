@@ -22,9 +22,12 @@ export class EditPlayerComponent implements OnInit {
     // Deine Logik hier
   }
 
-  closeDialog(picture: string): void {
+  closeDialog(picture?: string): void {
     this.dialogRef.close(picture);  
-    }
-
+  }
+  
+  deletePlayer(): void {
+      this.dialogRef.close('delete');  
+   }
 
 }

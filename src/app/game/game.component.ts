@@ -17,6 +17,7 @@ import {
   addDoc,
   getDoc,
   updateDoc,
+  docData,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -43,7 +44,9 @@ import { EditPlayerComponent } from '../edit-player/edit-player.component';
 export class GameComponent implements OnInit {
   pickCardAnimation = false;
   currentCard: string = '';
+  gameOver: boolean = false;
   game!: Game;
+  game$!: Observable<Game>;
   games$: Observable<Game[]>;
   firestore: Firestore = inject(Firestore);
   gameId!: string;
@@ -68,30 +71,33 @@ export class GameComponent implements OnInit {
         console.error('Error adding game: ', error);
       });
   }
-
-  updateGame(): void {
-    if (this.gameId) {
-      const gameDocRef = doc(this.firestore, `games/${this.gameId}`);
-      updateDoc(gameDocRef, {
-        deck: this.game.deck,
-        playedCards: this.game.playedCards,
-        players: this.game.players,
-        currentPlayer: this.game.currentPlayer,
-        currentCard: this.currentCard,
-      })
-        .then(() => {
-          console.log('Game updated successfully');
-        })
-        .catch((error) => {
-          console.error('Error updating game: ', error);
-        });
-    } else {
-      console.error('No game ID available to update.');
-    }
-  }
+ 
 
   ngOnInit(): void {
-    // Initialisiere ein leeres Spiel-Objekt, um undefined-Probleme zu vermeiden
+    // Route param wird verwendet, um die gameId zu erhalten
+    this.route.paramMap.subscribe((params) => {
+      this.gameId = params.get('id')!;
+  
+      if (this.gameId) {
+        // Wenn die gameId vorhanden ist, lade das Spiel von Firestore in Echtzeit
+        const gameDocRef = doc(this.firestore, `games/${this.gameId}`);
+        this.game$ = docData(gameDocRef) as Observable<Game>;
+  
+        // Abonniere die Echtzeit-Änderungen am Spiel
+        this.game$.subscribe((gameData) => {
+          if (gameData) {
+            this.game = gameData;
+          } else {
+            // Initialisiere ein leeres Spiel-Objekt, falls keine Daten existieren
+            this.initializeEmptyGame();
+          }
+        });
+      }
+    });
+  }
+  
+  // Methode zum Initialisieren eines leeren Spiels, falls Firestore-Daten fehlen
+  initializeEmptyGame(): void {
     this.game = new Game();
     this.game.players = [];
     this.game.deck = [];
@@ -100,13 +106,8 @@ export class GameComponent implements OnInit {
     this.game.pickCardAnimation = false;
     this.game.currentCard = '';
     this.game.player_images = [];
-
-    // Dann lade das Spiel von Firestore
-    this.route.paramMap.subscribe((params) => {
-      this.gameId = params.get('id')!;
-      this.loadGame();
-    });
   }
+  
 
   loadGame() {
     if (this.gameId) {
@@ -139,41 +140,36 @@ export class GameComponent implements OnInit {
 
   takeCard() {
     if (!this.pickCardAnimation && this.game.deck.length > 0) {
+      // Ziehe die oberste Karte vom Deck
       this.currentCard = this.game.deck.pop() || '';
-
-      console.log(
-        'Vorheriger Spieler (vor der Prüfung):',
-        this.game.currentPlayer
-      );
 
       // Überprüfe, ob currentPlayer korrekt initialisiert ist
       if (isNaN(this.game.currentPlayer)) {
-        console.error('currentPlayer ist NaN! Initialisierung auf 0.');
         this.game.currentPlayer = 0; // Setze currentPlayer auf den ersten Spieler
       }
-
-      console.log(
-        'Vorheriger Spieler (nach der Prüfung):',
-        this.game.currentPlayer
-      );
-      console.log('Anzahl der Spieler:', this.game.players.length);
 
       // Wechsle zum nächsten Spieler, wenn Spieler vorhanden sind
       if (this.game.players.length > 0) {
         this.game.currentPlayer =
           (this.game.currentPlayer + 1) % this.game.players.length;
-        console.log('Nächster Spieler:', this.game.currentPlayer);
       } else {
         console.error('Keine Spieler in der Liste.');
       }
 
+      // Starte die Kartenanimation
       this.pickCardAnimation = true;
-      this.updateGame();
+      this.updateGame(); // Aktualisiere das Spiel in der Datenbank
 
+      // Beende die Animation und aktualisiere das Spiel erneut nach 1 Sekunde
       setTimeout(() => {
-        this.game.playedCards.push(this.currentCard);
+        this.game.playedCards.push(this.currentCard); // Füge die Karte zu den gespielten Karten hinzu
         this.pickCardAnimation = false;
         this.updateGame();
+
+        // Überprüfe, ob das Deck leer ist, und beende das Spiel, wenn keine Karten mehr vorhanden sind
+        if (this.game.deck.length === 0) {
+          this.gameOver = true;
+        }
       }, 1000);
     }
   }
@@ -190,14 +186,50 @@ export class GameComponent implements OnInit {
     });
   }
 
+  updateGame() {
+    if (this.gameId) {
+      const gameDocRef = doc(this.firestore, `games/${this.gameId}`);
+      updateDoc(gameDocRef, { ...this.game })
+        .then(() => console.log('Game updated successfully'))
+        .catch(error => console.error('Error updating game:', error));
+    }
+  }
+  
+  
+
   editPlayer(playerId: number) {
-    console.log('Edit player', playerId);
-    const dialogRef = this.dialog.open(EditPlayerComponent);
-    dialogRef.afterClosed().subscribe((selectedImage: string) => {
-      if (selectedImage) {
-        this.game.player_images[playerId] = '/assets/img/profile/' + selectedImage;  
-        this.updateGame();
-      }
+    // Öffnet den Dialog zur Bearbeitung des Spielers
+    const dialogRef = this.dialog.open(EditPlayerComponent, {
+      data: { playerId }, // Übergibt die Spieler-ID an den Dialog
     });
+
+    dialogRef.afterClosed().subscribe((result: string) => {
+      this.handlePlayerAction(playerId, result); // Aufruf der neuen Funktion zur Verarbeitung des Ergebnisses
+    });
+  }
+
+  // Die Funktion, die das Ergebnis des Dialogs verarbeitet
+  handlePlayerAction(playerId: number, result: string): void {
+    if (result === 'delete') {
+      // Spieler löschen
+      this.game.players.splice(playerId, 1); // Entfernt den Spieler aus dem players-Array
+      this.game.player_images.splice(playerId, 1); // Entfernt das Profilbild des Spielers
+      this.updateGame(); // Aktualisiert den Spielstatus in der Datenbank
+    } else if (result) {
+      // Profilbild aktualisieren
+      this.game.player_images[playerId] = '/assets/img/profile/' + result; // Profilbild speichern
+      this.updateGame(); // Aktualisiert den Spielstatus in der Datenbank
+    }
+  }
+
+  // Methode zum Neustart des Spiels
+  restartGame() {
+    this.gameOver = false;
+    this.game = new Game();
+    this.game.initializeDeck();
+    this.game.shuffleDeck();
+    this.game.playedCards = [];
+    this.game.currentPlayer = 0;
+    this.updateGame();
   }
 }

@@ -102,6 +102,37 @@
     }
 }
 
+.game-over-container {
+    display: flex;
+    justify-content: center;   
+    align-items: center;       
+    flex-direction: column;    
+    height: 100vh;             
+    background-color: rgba(0, 0, 0, 0.8);  
+  
+    img {
+      max-width: 80%;          
+      height: auto;           
+      margin-bottom: 20px;     
+    }
+  
+    button {
+      background-color: #ff0000;   
+      color: #fff;                
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  
+      &:hover {
+        background-color: #cc0000;   
+      }
+    }
+  }
+  
+
+
 app-player, app-player-mobile  {
     cursor: pointer;
 

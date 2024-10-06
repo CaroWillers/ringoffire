@@ -1,5 +1,8 @@
-<h2 class="align-self: center" mat-dialog-title>Edit Player</h2>
-<div *ngFor="let picture of allProfilePictures">
+<h2 mat-dialog-title class="dialog-title">Edit Player</h2>
+
+<div class="dialog-content">
+  <!-- Profilbilder zur Auswahl -->
+  <div *ngFor="let picture of allProfilePictures">
     <img 
       class="profile-picture" 
       src="./assets/img/profile/{{ picture }}" 
@@ -7,4 +10,10 @@
       (click)="closeDialog(picture)"  
     >
   </div>
-  
+</div>
+
+<!-- Buttons zur Bearbeitung des Dialogs -->
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-button (click)="deletePlayer()">Delete Player</button>
+  <button mat-button (click)="closeDialog()">Close</button>
+</div>
